@@ -31,7 +31,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
     @Override
     public UserVo getUser(int id) {
-        String key= RedisKeyConstants.USER_INFO_KFY+"id";
+        String key= RedisKeyConstants.USER_INFO_KFY + id;
         User user = (User)redisTemplate.opsForValue().get(key);
         if(user==null){
             user=getById(id);
@@ -66,7 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteUser(int id) {
-        String key= RedisKeyConstants.USER_INFO_KFY+"id";
+        String key= RedisKeyConstants.USER_INFO_KFY + id;
         redisTemplate.delete(key);
         removeById(id);
     }
@@ -74,14 +74,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUser(UserAddDto dto) {
-        updateById(revert(dto));
+        User user = revert(dto);
+        updateById(user);
+        // 更新后清除缓存保证一致性
+        String key= RedisKeyConstants.USER_INFO_KFY + user.getId();
+        redisTemplate.delete(key);
     }
 
     @Override
     @Async("taskExecutor")
     public void asyncProcess(List<Integer> ids) {
         for(Integer id:ids){
-            String key= RedisKeyConstants.USER_INFO_KFY+"id";
+            String key= RedisKeyConstants.USER_INFO_KFY + id;
             User user = (User)redisTemplate.opsForValue().get(key);
             if(user==null){
                 user=getById(id);

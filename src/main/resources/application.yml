@@ -28,8 +28,12 @@ mybatis-plus:
     db-config:
       id-type: auto
 
-knife4j:
-  enable: true
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
 
 logging:
   level:
